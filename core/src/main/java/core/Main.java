@@ -38,5 +38,6 @@ public class Main {
 
     private static void handleConnection(Socket client) {
         System.out.println(client.getInetAddress());
+        System.out.println(Thread.currentThread().getName());
     }
 }
