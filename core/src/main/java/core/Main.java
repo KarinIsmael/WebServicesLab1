@@ -1,7 +1,7 @@
 package core;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -17,7 +17,7 @@ public class Main {
                 Socket client = serverSocket.accept();
                 executorService.submit(()->handleConnection(client));
                 output(client);
-
+                //input();
                 client.close();
             }
 
@@ -36,8 +36,30 @@ public class Main {
 
     }
 
+  /*  private static void input() throws IOException {
+        Socket socket = new Socket();
+        InetSocketAddress socketAddress = new InetSocketAddress(5050);
+        socket.connect(socketAddress);
+        BufferedReader inputFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+        while(true){
+            var line = inputFromServer.readLine();
+            if(line== null || line.isEmpty()) {
+                break;
+            }
+            System.out.println(line);
+        }
+
+        inputFromServer.close();
+        socket.close();
+
+    }*/
+
     private static void handleConnection(Socket client) {
         System.out.println(client.getInetAddress());
         System.out.println(Thread.currentThread().getName());
     }
+
+
 }
+

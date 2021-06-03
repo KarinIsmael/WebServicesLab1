@@ -1,9 +1,9 @@
-package client;
+package user;
 
 import java.io.IOException;
 import java.net.Socket;
 
-public class Client {
+public class User {
 
     public static void main(String[] args) {
 

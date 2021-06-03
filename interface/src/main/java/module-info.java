@@ -1,0 +1,3 @@
+module interf{
+    exports interf;
+        }

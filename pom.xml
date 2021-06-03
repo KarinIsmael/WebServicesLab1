@@ -10,6 +10,8 @@
     <modules>
         <module>client</module>
         <module>core</module>
+        <module>Welcome</module>
+        <module>interface</module>
     </modules>
     <packaging>pom</packaging>
     <name>parent-project</name>
