@@ -4,10 +4,14 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Main {
+    public static List<String> billboard = new ArrayList<>();
+
     public static void main(String[] args) {
 
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -24,6 +28,7 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     private static void output(Socket client) throws IOException {
@@ -55,11 +60,38 @@ public class Main {
 
     }*/
 
-    private static void handleConnection(Socket client) {
+    private static void handleConnection(Socket client){
         System.out.println(client.getInetAddress());
         System.out.println(Thread.currentThread().getName());
     }
 
+    private static void input(Socket client) throws IOException {
+        BufferedReader inputFromClient = new BufferedReader(new InputStreamReader((client.getInputStream())));
+
+        requestHandler(inputFromClient);
+        //String line = inputFromClient.readLine();
+
+        //System.out.println(line);
+
+        inputFromClient.close();
+        client.close();
+    }
+
+    private static void requestHandler(BufferedReader inputFromClient) throws IOException {
+        List<String> templist = new ArrayList<>();
+
+        while (true) {
+            var line = inputFromClient.readLine();
+            if (line == null || line.isEmpty()) {
+                break;
+            }
+            templist.add(line);
+            System.out.println(line);
+        }
+        synchronized (billboard){
+            billboard.addAll(templist);
+        }
+    }
 
 }
 
