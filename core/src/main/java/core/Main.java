@@ -1,9 +1,17 @@
 package core;
 
+import com.google.gson.Gson;
+import user.UserInfo;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 import java.io.*;
-import java.net.InetSocketAddress;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -11,6 +19,8 @@ import java.util.concurrent.Executors;
 
 public class Main {
     public static List<String> billboard = new ArrayList<>();
+
+    static EntityManagerFactory emf = Persistence.createEntityManagerFactory("user");
 
     public static void main(String[] args) {
 
@@ -20,6 +30,7 @@ public class Main {
             while (true){
                 Socket client = serverSocket.accept();
                 executorService.submit(()->handleConnection(client));
+                saveIpToDatabase(client);
                 output(client);
                 //input();
                 client.close();
@@ -29,6 +40,51 @@ public class Main {
             e.printStackTrace();
         }
 
+    }
+
+    private static void saveIpToDatabase(Socket client) throws IOException {
+        InetAddress ipAdress = client.getInetAddress();
+        String userIp = ipAdress.toString();
+
+        EntityManager em = emf.createEntityManager();
+
+        TypedQuery<String> query = em.createQuery("SELECT ip.ipAddress FROM UserInfo ip", String.class);
+
+        List<String> ipAdresses = query.getResultList();
+
+        if(!ipAdresses.contains(userIp))
+         {
+            UserInfo user = new UserInfo(userIp);
+
+            em.getTransaction().begin();
+            em.persist(user);
+            em.getTransaction().commit();
+
+        } else if(ipAdresses.contains(userIp))
+        {
+            System.out.println(userIp+" visited again!");
+            var outputToClient = client.getOutputStream();
+            sendResponse(outputToClient);
+            //PrintWriter outputToClient = new PrintWriter(client.getOutputStream());
+            //outputToClient.print("HTTP/1.1 200 OK \r\nThank you for visiting again!");
+        }
+        em.close();
+    }
+
+    private static void sendResponse(OutputStream outputToClient) throws IOException {
+
+        String response = "Thank you for visiting again";
+
+        Gson gson = new Gson();
+        String json = gson.toJson(response);
+        System.out.println(json);
+
+        byte[] data = json.getBytes(StandardCharsets.UTF_8);
+
+        String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + data.length+"\r\n\r\n";
+        outputToClient.write(header.getBytes());
+        outputToClient.write(data);
+        outputToClient.flush();
     }
 
     private static void output(Socket client) throws IOException {
