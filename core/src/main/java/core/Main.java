@@ -40,11 +40,12 @@ public class Main {
 
     }
 
-    private static void handleConnection(Socket client){
+    private static void handleConnection(Socket client) {
 
         try {
             BufferedReader inputFromClient = new BufferedReader(new InputStreamReader((client.getInputStream())));
             var url = requestHandler(inputFromClient);
+//            var url2 = requestHandlerInputMessage(inputFromClient);
 
             var outputToClient = client.getOutputStream();
 
@@ -63,6 +64,9 @@ public class Main {
         else if (url.equals("/user-ips")){
             sendIpAdresses(outputToClient);
         }
+        else if(url.contains("/sendmessage/"))
+                DatabaseManagement.saveMessage(inputFromClient,outputToClient);
+              //saveMessage2(outputToClient, url);
         else{
             output(client);
         }
@@ -78,6 +82,29 @@ public class Main {
         System.out.println(client.getInetAddress());
         System.out.println(Thread.currentThread().getName());
     }
+//
+//    private static void saveMessage2(OutputStream outputToClient, String url) throws IOException {
+//
+//        EntityManager em = emf.createEntityManager();
+//
+//        Usermessage usermessage = new Usermessage(url);
+//        em.getTransaction().begin();
+//        em.persist(usermessage);
+//        em.getTransaction().commit();
+//
+//        Gson gson = new Gson();
+//
+//        String json = gson.toJson("Following message has been saved to the server: "+url);
+//        System.out.println(json);
+//
+//        byte[] data = json.getBytes(StandardCharsets.UTF_8);
+//        String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + data.length + "\r\n\r\n";
+//        outputToClient.write(header.getBytes());
+//        outputToClient.write(data);
+//        outputToClient.flush();
+//        em.close();
+//
+//    }
 
     private static void sendOrangutangResponse(OutputStream outputToClient) throws IOException {
 
@@ -140,6 +167,7 @@ public class Main {
     }
 
     private static void sendIpAdresses(OutputStream outputToClient) throws IOException {
+
         EntityManager em = emf.createEntityManager();
 
         TypedQuery<String> query = em.createQuery("SELECT ip.ipAddress FROM UserInfo ip", String.class);
@@ -147,6 +175,7 @@ public class Main {
         List<String> ipAdresses = query.getResultList();
 
         Gson gson = new Gson();
+
         String json = gson.toJson(ipAdresses);
         System.out.println(json);
 
@@ -266,6 +295,38 @@ public class Main {
         }
         return url;
     }
+
+//    private static String requestHandlerInputMessage(BufferedReader inputFromClient) throws IOException {
+//        String url2="";
+//
+//        List<String> templist = new ArrayList<>();
+//
+//        while (true) {
+//            var line = inputFromClient.readLine();
+//           url2 = line.split("/sendmessage/")[12];
+//            /*if (line.startsWith("GET")) {
+//                url2 = line.split("/sendmessage/")[15];
+//            }else if (line == null || line.isEmpty()) {
+//                break;
+//            } else System.out.println("Wrong");*/
+//
+//            templist.add(url2);
+//            System.out.println(url2);
+//        }
+//        synchronized (billboard){
+//            billboard.addAll(templist);
+//        }
+//        return url2;
+//    }
+
+/*
+    private static String sendMessage(){
+        var url = "";
+
+
+
+        return url;
+    }*/
 
 }
 
