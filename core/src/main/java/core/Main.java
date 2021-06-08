@@ -12,6 +12,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -30,8 +32,6 @@ public class Main {
             while (true){
                 Socket client = serverSocket.accept();
                 executorService.submit(()->handleConnection(client));
-                //flytta allt code till annan method efter handleconnection
-
             }
 
         } catch (IOException e) {
@@ -54,8 +54,11 @@ public class Main {
 
         if(url.equals("/hej")) {
             sendJsonResponse(outputToClient);
-        }else if (url.equals("/apa.jpg")){
+        }else if (url.equals("/apa")){
             sendImageResponse(outputToClient);
+
+        }else if(url.equals("/morningface")){
+            sendOrangutangResponse(outputToClient);
         }
         else if (url.equals("/user-ips")){
             sendIpAdresses(outputToClient);
@@ -76,7 +79,63 @@ public class Main {
         System.out.println(Thread.currentThread().getName());
     }
 
-    private static void sendImageResponse(OutputStream outputToClient) {
+    private static void sendOrangutangResponse(OutputStream outputToClient) throws IOException {
+
+        String header = "";
+        byte[] data = new byte[0];
+
+        File find = Path.of("core", "target", "classes", "Orangutang.jpg").toFile();
+
+        if (!(find.exists()&&!find.isDirectory())){
+            header = "HTTP/1.1 404 Not Found\r\nContent-length: 0\r\n\r\n";
+
+        } else {
+            try (FileInputStream fileInput = new FileInputStream(find)) {
+
+                data = new byte[(int) find.length()];
+                fileInput.read(data);
+
+                var contentType = Files.probeContentType(find.toPath());
+                header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        outputToClient.write(header.getBytes());
+        outputToClient.write(data);
+        outputToClient.flush();
+
+    }
+
+    private static void sendImageResponse(OutputStream outputToClient) throws IOException {
+
+        String header = "";
+        byte[] data = new byte[0];
+
+        File find = Path.of("core", "target", "classes", "apa.png").toFile();
+
+        if (!(find.exists()&&!find.isDirectory())){
+            header = "HTTP/1.1 404 Not Found\r\nContent-length: 0\r\n\r\n";
+
+        } else {
+        try (FileInputStream fileInput = new FileInputStream(find)) {
+
+            data = new byte[(int) find.length()];
+            fileInput.read(data);
+
+            var contentType = Files.probeContentType(find.toPath());
+            header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+        outputToClient.write(header.getBytes());
+        outputToClient.write(data);
+        outputToClient.flush();
 
     }
 
@@ -97,7 +156,6 @@ public class Main {
         outputToClient.write(data);
         outputToClient.flush();
     }
-
 
     private static void saveIpToDatabase(Socket client) throws IOException {
         InetAddress ipAdress = client.getInetAddress();
@@ -172,8 +230,6 @@ public class Main {
 
     }*/
 
-
-
     private static void input(Socket client) throws IOException {
         BufferedReader inputFromClient = new BufferedReader(new InputStreamReader((client.getInputStream())));
 
@@ -210,27 +266,6 @@ public class Main {
         }
         return url;
     }
-
-
-//    private static String readRequest(BufferedReader inputFromClient) throws IOException {
-//
-//        var url = "";
-//        while (true) {
-//            var line = inputFromClient.readLine();
-//            if (line.startsWith("GET")) {
-//                url = line.split(" ")[1];
-//            } else if (line.startsWith("POST")) {
-//                url = line.split(" ")[1];
-//            } else if (line.startsWith("HEAD")) {
-//                url = line.split(" ")[1];
-//            } else if (line == null || line.isEmpty()) {
-//                break;
-//            }
-//            System.out.println(line);
-//
-//        }
-//        return url;
-//    }
 
 }
 
