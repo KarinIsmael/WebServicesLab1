@@ -30,10 +30,8 @@ public class Main {
             while (true){
                 Socket client = serverSocket.accept();
                 executorService.submit(()->handleConnection(client));
-                saveIpToDatabase(client);
-                output(client);
-                //input();
-                client.close();
+                //flytta allt code till annan method efter handleconnection
+
             }
 
         } catch (IOException e) {
@@ -41,6 +39,25 @@ public class Main {
         }
 
     }
+
+    private static void sendIpAdresses(OutputStream outputToClient) throws IOException {
+        EntityManager em = emf.createEntityManager();
+
+        TypedQuery<String> query = em.createQuery("SELECT ip.ipAddress FROM UserInfo ip", String.class);
+
+        List<String> ipAdresses = query.getResultList();
+
+        Gson gson = new Gson();
+        String json = gson.toJson(ipAdresses);
+        System.out.println(json);
+
+        byte[] data = json.getBytes(StandardCharsets.UTF_8);
+        String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + data.length+"\r\n\r\n";
+        outputToClient.write(header.getBytes());
+        outputToClient.write(data);
+        outputToClient.flush();
+    }
+
 
     private static void saveIpToDatabase(Socket client) throws IOException {
         InetAddress ipAdress = client.getInetAddress();
@@ -63,8 +80,7 @@ public class Main {
         } else if(ipAdresses.contains(userIp))
         {
             System.out.println(userIp+" visited again!");
-            var outputToClient = client.getOutputStream();
-            sendResponse(outputToClient);
+
             //PrintWriter outputToClient = new PrintWriter(client.getOutputStream());
             //outputToClient.print("HTTP/1.1 200 OK \r\nThank you for visiting again!");
         }
@@ -133,12 +149,20 @@ public class Main {
         client.close();
     }
 
-    private static void requestHandler(BufferedReader inputFromClient) throws IOException {
+    private static String requestHandler(BufferedReader inputFromClient) throws IOException {
+        var url="";
+
         List<String> templist = new ArrayList<>();
 
         while (true) {
             var line = inputFromClient.readLine();
-            if (line == null || line.isEmpty()) {
+            if (line.startsWith("GET")) {
+                url = line.split(" ")[1];
+            } else if (line.startsWith("POST")) {
+                url = line.split(" ")[1];
+            } else if (line.startsWith("HEAD")) {
+                url = line.split(" ")[1];
+            } else if (line == null || line.isEmpty()) {
                 break;
             }
             templist.add(line);
@@ -147,6 +171,7 @@ public class Main {
         synchronized (billboard){
             billboard.addAll(templist);
         }
+        return url;
     }
 
 }
