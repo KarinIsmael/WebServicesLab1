@@ -40,6 +40,46 @@ public class Main {
 
     }
 
+    private static void handleConnection(Socket client){
+
+        try {
+            BufferedReader inputFromClient = new BufferedReader(new InputStreamReader((client.getInputStream())));
+            var url = requestHandler(inputFromClient);
+
+            var outputToClient = client.getOutputStream();
+
+
+            saveIpToDatabase(client);
+
+
+        if(url.equals("/hej")) {
+            sendJsonResponse(outputToClient);
+        }else if (url.equals("/apa.jpg")){
+            sendImageResponse(outputToClient);
+        }
+        else if (url.equals("/user-ips")){
+            sendIpAdresses(outputToClient);
+        }
+        else{
+            output(client);
+        }
+        //input();
+        inputFromClient.close();
+        outputToClient.close();
+        client.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(client.getInetAddress());
+        System.out.println(Thread.currentThread().getName());
+    }
+
+    private static void sendImageResponse(OutputStream outputToClient) {
+
+    }
+
     private static void sendIpAdresses(OutputStream outputToClient) throws IOException {
         EntityManager em = emf.createEntityManager();
 
@@ -87,7 +127,7 @@ public class Main {
         em.close();
     }
 
-    private static void sendResponse(OutputStream outputToClient) throws IOException {
+    private static void sendJsonResponse(OutputStream outputToClient) throws IOException {
 
         String response = "Thank you for visiting again";
 
@@ -132,10 +172,7 @@ public class Main {
 
     }*/
 
-    private static void handleConnection(Socket client){
-        System.out.println(client.getInetAddress());
-        System.out.println(Thread.currentThread().getName());
-    }
+
 
     private static void input(Socket client) throws IOException {
         BufferedReader inputFromClient = new BufferedReader(new InputStreamReader((client.getInputStream())));
@@ -173,6 +210,27 @@ public class Main {
         }
         return url;
     }
+
+
+//    private static String readRequest(BufferedReader inputFromClient) throws IOException {
+//
+//        var url = "";
+//        while (true) {
+//            var line = inputFromClient.readLine();
+//            if (line.startsWith("GET")) {
+//                url = line.split(" ")[1];
+//            } else if (line.startsWith("POST")) {
+//                url = line.split(" ")[1];
+//            } else if (line.startsWith("HEAD")) {
+//                url = line.split(" ")[1];
+//            } else if (line == null || line.isEmpty()) {
+//                break;
+//            }
+//            System.out.println(line);
+//
+//        }
+//        return url;
+//    }
 
 }
 
