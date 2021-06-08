@@ -55,6 +55,7 @@ public class Main {
 
         if(url.equals("/hej")) {
             sendJsonResponse(outputToClient);
+
         }else if (url.equals("/apa")){
             sendImageResponse(outputToClient);
 
@@ -187,6 +188,7 @@ public class Main {
     }
 
     private static void saveIpToDatabase(Socket client) throws IOException {
+
         InetAddress ipAdress = client.getInetAddress();
         String userIp = ipAdress.toString();
 
@@ -217,7 +219,6 @@ public class Main {
     private static void sendJsonResponse(OutputStream outputToClient) throws IOException {
 
         String response = "Thank you for visiting again";
-
         Gson gson = new Gson();
         String json = gson.toJson(response);
         System.out.println(json);
@@ -259,17 +260,17 @@ public class Main {
 
     }*/
 
-    private static void input(Socket client) throws IOException {
-        BufferedReader inputFromClient = new BufferedReader(new InputStreamReader((client.getInputStream())));
-
-        requestHandler(inputFromClient);
-        //String line = inputFromClient.readLine();
-
-        //System.out.println(line);
-
-        inputFromClient.close();
-        client.close();
-    }
+//    private static void input(Socket client) throws IOException {
+//        BufferedReader inputFromClient = new BufferedReader(new InputStreamReader((client.getInputStream())));
+//
+//        requestHandler(inputFromClient);
+//        //String line = inputFromClient.readLine();
+//
+//        //System.out.println(line);
+//
+//        inputFromClient.close();
+//        client.close();
+//    }
 
     private static String requestHandler(BufferedReader inputFromClient) throws IOException {
         var url="";
