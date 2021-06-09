@@ -38,6 +38,7 @@ public class Main {
             e.printStackTrace();
         }
 
+        emf.close();
     }
 
     private static void handleConnection(Socket client) {
@@ -49,12 +50,8 @@ public class Main {
 
             OutputStream outputToClient = client.getOutputStream();
 
-
-            DatabaseManagement.saveIpToDatabase(client);
-
-
         if(url.equals("/hej")) {
-            sendJsonResponse(outputToClient);
+            sendJsonResponse(outputToClient, inputFromClient);
 
         }else if (url.equals("/apa")){
             sendImageResponse(outputToClient);
@@ -66,11 +63,13 @@ public class Main {
             DatabaseManagement.sendIpAdresses(outputToClient);
         }
         else if(url.contains("/sendmessage/"))
-                DatabaseManagement.saveMessage(inputFromClient,outputToClient);
+                DatabaseManagement.saveMessage(url,outputToClient);
               //saveMessage2(outputToClient, url);
         else{
             output(client);
         }
+
+        DatabaseManagement.saveIpToDatabase(client,outputToClient);
         //input();
         inputFromClient.close();
         outputToClient.close();
@@ -167,8 +166,9 @@ public class Main {
 
     }
 
-    private static void sendJsonResponse(OutputStream outputToClient) throws IOException {
+    private static void sendJsonResponse(OutputStream outputToClient, BufferedReader inputFromClient) throws IOException {
 
+        String url = inputFromClient.readLine();
         String v = null;
         Welcome welcome = null;
         TypeOfUser annotation = welcome.getClass().getAnnotation(TypeOfUser.class);
@@ -197,7 +197,7 @@ public class Main {
         outputToClient.print("HTTP/1.1 404 Not Found\r\nContent-length: 0\r\n\r\n");
 
         outputToClient.flush();
-        outputToClient.close();
+        //outputToClient.close();
 
     }
 
@@ -288,6 +288,7 @@ public class Main {
 
         return url;
     }*/
+
 
 }
 

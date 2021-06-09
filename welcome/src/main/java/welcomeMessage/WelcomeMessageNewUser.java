@@ -9,7 +9,7 @@ public class WelcomeMessageNewUser {
     public class WelcomeMessage implements Welcome {
         @Override
         public String welcome() {
-            return "Welcome back to the server!";
+            return "Welcome to the server!";
         }
     }
 }

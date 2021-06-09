@@ -9,6 +9,7 @@ import javax.persistence.Id;
 public class Usermessage {
     @Id
     private int id;
+    @Basic
     private String message;
 
 

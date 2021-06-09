@@ -7,6 +7,6 @@ import interf.Welcome;
 public class WelcomeMessage implements Welcome {
     @Override
     public String welcome() {
-        return "Welcome to the server!";
+        return "Welcome back to the server!";
     }
 }

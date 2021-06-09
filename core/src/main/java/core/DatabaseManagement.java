@@ -1,55 +1,54 @@
 package core;
 
 import com.google.gson.Gson;
-import com.google.gson.internal.Streams;
-import interf.TypeOfUser;
-import interf.Welcome;
 import user.UserInfo;
+import user.Usermessage;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.ServiceLoader;
 
 public class DatabaseManagement {
-    static void saveMessage(BufferedReader inputFromClient, OutputStream outputToClient) throws IOException {
+    static void saveMessage(String url, OutputStream outputToClient) throws IOException {
 
             EntityManager em = Main.emf.createEntityManager();
+            String line = url;
 
-        String line = inputFromClient.readLine();
-
-            while(true) {
+            System.out.println("test");
 //                if (line.startsWith("GET") && line.contains("/sendmessage")) {
                 if (line.contains("/sendmessage/")) {
-                    String message = line.split("/sendmessage/")[15];
 
-                    UserInfo userInfo = new UserInfo(message);
+                    String message = line.substring(13);
+
+                    Usermessage usermessage = new Usermessage(message);
 
                     em.getTransaction().begin();
-                    em.persist(userInfo);
+                    em.persist(usermessage);
                     em.getTransaction().commit();
 
                     Gson gson = new Gson();
 
-                    String json = gson.toJson(message);
-                    System.out.println("Following message has been saved to the server: " + json);
+                    String text = "Following message has been saved to the server: ";
+
+                    String json = gson.toJson(text + message);
+
+                    System.out.println(json);
 
                     byte[] data = json.getBytes(StandardCharsets.UTF_8);
                     String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + data.length + "\r\n\r\n";
                     outputToClient.write(header.getBytes());
                     outputToClient.write(data);
                     outputToClient.flush();
-                    Main.emf.close();
+                    //outputToClient.close();
+                    //Main.emf.close();
                     em.close();
                 }
 
-                }
             }
 
     static void sendIpAdresses(OutputStream outputToClient) throws IOException {
@@ -72,7 +71,7 @@ public class DatabaseManagement {
         outputToClient.flush();
     }
 
-    static void saveIpToDatabase(Socket client) throws IOException {
+    static void saveIpToDatabase(Socket client, OutputStream outputToClient) throws IOException {
 
         //ServiceLoader<Welcome> welcomes = ServiceLoader.load(Welcome.class);
 
@@ -93,10 +92,28 @@ public class DatabaseManagement {
             em.persist(user);
             em.getTransaction().commit();
 
-             WelcomeMessages.WelcomeNewUser();
+             WelcomeMessages.welcomeNewUser();
 
          } else if(ipAdresses.contains(userIp))
         {
+
+            //OutputStream outputToClient = client.getOutputStream();
+
+            String message = WelcomeMessages.welcomeOldUser();
+
+           Gson gson = new Gson();
+           String json = gson.toJson(message);
+
+            System.out.println(json);
+
+            byte[] data = json.getBytes(StandardCharsets.UTF_8);
+
+            String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + data.length+"\r\n\r\n";
+            outputToClient.write(header.getBytes());
+            outputToClient.write(data);
+            outputToClient.flush();
+            System.out.println(userIp+" visited again!");
+
            /* Welcome welcome = null;
             TypeOfUser annotation = welcome.getClass().getAnnotation(TypeOfUser.class);
             annotation.equals("/old");
@@ -111,7 +128,7 @@ public class DatabaseManagement {
             outputToClient.write(header.getBytes());
             outputToClient.write(data);
             outputToClient.flush();*/
-            System.out.println(userIp+" visited again!");
+            //System.out.println(userIp+" visited again!");
 
             //PrintWriter outputToClient = new PrintWriter(client.getOutputStream());
             //outputToClient.print("HTTP/1.1 200 OK \r\nThank you for visiting again!");
