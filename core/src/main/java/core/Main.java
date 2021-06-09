@@ -92,10 +92,7 @@ public class Main {
 
         File find = Path.of("core", "target", "classes", "Orangutang.jpg").toFile();
 
-        if (!(find.exists()&&!find.isDirectory())){
-            header = "HTTP/1.1 404 Not Found\r\nContent-length: 0\r\n\r\n";
-
-        } else {
+            //try (FileInputStream fileInput = new FileInputStream(find)) {
             try (FileInputStream fileInput = new FileInputStream(find)) {
 
                 data = new byte[(int) find.length()];
@@ -104,10 +101,10 @@ public class Main {
                 String contentType = Files.probeContentType(find.toPath());
                 header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
 
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+          }
+
 
         outputToClient.write(header.getBytes());
         outputToClient.write(data);
@@ -253,15 +250,6 @@ public class Main {
 //        }
 //        return url2;
 //    }
-
-/*
-    private static String sendMessage(){
-        var url = "";
-
-
-
-        return url;
-    }*/
 
 
 }
