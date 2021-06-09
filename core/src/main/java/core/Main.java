@@ -30,11 +30,11 @@ public class Main {
 
         ExecutorService executorService = Executors.newCachedThreadPool();
 
-        try (ServerSocket serverSocket = new ServerSocket(5050)){
-            while (true){
+        try (ServerSocket serverSocket = new ServerSocket(5050)) {
+            while (true) {
                 Socket client = serverSocket.accept();
                 System.out.println("=======================================");
-                executorService.submit(()->handleConnection(client));
+                executorService.submit(() -> handleConnection(client));
             }
 
         } catch (IOException e) {
@@ -52,30 +52,28 @@ public class Main {
             String url = requestHandler(inputFromClient);
             OutputStream outputToClient = client.getOutputStream();
 
-        if(url.equals("/hej")) {
-            sendJsonResponse(outputToClient, inputFromClient);
+            if (url.equals("/hej")) {
+                sendJsonResponse(outputToClient, inputFromClient);
 
-        }else if (url.equals("/apa")){
-            sendImageResponse(outputToClient);
+            } else if (url.equals("/apa")) {
+                sendImageResponse(outputToClient);
 
-        }else if(url.equals("/morningface")){
-            sendOrangutangResponse(outputToClient);
-        }
-        else if (url.equals("/user-ips")){
-            DatabaseManagement.sendIpAdresses(outputToClient);
-        }
-        else if(url.contains("/sendmessage/"))
-                DatabaseManagement.saveMessage(url,outputToClient);
+            } else if (url.equals("/morningface")) {
+                sendOrangutangResponse(outputToClient);
+            } else if (url.equals("/user-ips")) {
+                DatabaseManagement.sendIpAdresses(outputToClient);
+            } else if (url.contains("/sendmessage/"))
+                DatabaseManagement.saveMessage(url, outputToClient);
 
-        else{
-            output(client);
-        }
+            else {
+                output(client);
+            }
 
-        DatabaseManagement.saveIpToDatabase(client,outputToClient);
-        //vi can lagra alla close method i en sparat method
-        inputFromClient.close();
-        outputToClient.close();
-        client.close();
+            DatabaseManagement.saveIpToDatabase(client, outputToClient);
+            //vi can lagra alla close method i en sparat method
+            inputFromClient.close();
+            outputToClient.close();
+            client.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -87,76 +85,54 @@ public class Main {
 
     private static void sendOrangutangResponse(OutputStream outputToClient) throws IOException {
 
-        String header = "";
-        byte[] data = new byte[0];
-
         File find = Path.of("core", "target", "classes", "Orangutang.jpg").toFile();
 
-            //try (FileInputStream fileInput = new FileInputStream(find)) {
-            try (FileInputStream fileInput = new FileInputStream(find)) {
-
-                data = new byte[(int) find.length()];
-                fileInput.read(data);
-
-                String contentType = Files.probeContentType(find.toPath());
-                header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
-
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-          }
-
-
-        outputToClient.write(header.getBytes());
-        outputToClient.write(data);
-        outputToClient.flush();
+        fileImporter(outputToClient, find);
 
     }
 
     private static void sendImageResponse(OutputStream outputToClient) throws IOException {
 
-        String header = "";
-        byte[] data = new byte[0];
-
         File find = Path.of("core", "target", "classes", "apa.png").toFile();
 
-        try (FileInputStream fileInput = new FileInputStream(find)) {
+        fileImporter(outputToClient, find);
 
-            data = new byte[(int) find.length()];
-            fileInput.read(data);
-
-            String contentType = Files.probeContentType(find.toPath());
-            header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
     }
+
+    private static void fileImporter(OutputStream outputToClient, File find) throws IOException {
+        FileInputStream fileInput = new FileInputStream(find);
+
+        byte[] data = new byte[(int) find.length()];
+        fileInput.read(data);
+
+        String contentType = Files.probeContentType(find.toPath());
+        String header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
 
         outputToClient.write(header.getBytes());
         outputToClient.write(data);
         outputToClient.flush();
-
     }
 
     private static void sendJsonResponse(OutputStream outputToClient, BufferedReader inputFromClient) throws IOException {
 
         String url = inputFromClient.readLine();
-        String v = null;
+        String message = null;
         Welcome welcome = null;
         TypeOfUser annotation = welcome.getClass().getAnnotation(TypeOfUser.class);
         boolean an = annotation.equals("/old");
-            while (an){
-                v = welcome.welcome();
+        while (an) {
+            message = welcome.welcome();
         }
-        //String response = "Thank you for visiting again";
-        //WelcomeMessages.welcomeOldUser();
+        getGson(outputToClient, message);
+    }
+
+    static void getGson(OutputStream outputToClient, String v) throws IOException {
         Gson gson = new Gson();
-        //String json = gson.toJson(WelcomeMessages.welcomeOldUser());
         String json = gson.toJson(v);
         System.out.println(json);
-
         byte[] data = json.getBytes(StandardCharsets.UTF_8);
+        String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + data.length + "\r\n\r\n";
 
-        String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + data.length+"\r\n\r\n";
         outputToClient.write(header.getBytes());
         outputToClient.write(data);
         outputToClient.flush();
@@ -222,7 +198,7 @@ public class Main {
             templist.add(line);
             System.out.println(line);
         }
-        synchronized (synchronised){
+        synchronized (synchronised) {
             synchronised.addAll(templist);
         }
         return url;

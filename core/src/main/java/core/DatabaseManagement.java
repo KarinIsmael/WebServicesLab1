@@ -101,17 +101,7 @@ public class DatabaseManagement {
 
             String message = WelcomeMessages.welcomeOldUser();
 
-           Gson gson = new Gson();
-           String json = gson.toJson(message);
-
-            System.out.println(json);
-
-            byte[] data = json.getBytes(StandardCharsets.UTF_8);
-
-            String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + data.length+"\r\n\r\n";
-            outputToClient.write(header.getBytes());
-            outputToClient.write(data);
-            outputToClient.flush();
+            Main.getGson(outputToClient, message);
             System.out.println(userIp+" visited again!");
 
            /* Welcome welcome = null;
