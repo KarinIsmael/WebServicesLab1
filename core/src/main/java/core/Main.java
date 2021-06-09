@@ -127,9 +127,9 @@ public class Main {
         getGson(outputToClient, message);
     }
 
-    static void getGson(OutputStream outputToClient, String v) throws IOException {
+   public static void getGson(OutputStream outputToClient, String message) throws IOException {
         Gson gson = new Gson();
-        String json = gson.toJson(v);
+        String json = gson.toJson(message);
         System.out.println(json);
         byte[] data = json.getBytes(StandardCharsets.UTF_8);
         String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + data.length + "\r\n\r\n";
@@ -147,26 +147,6 @@ public class Main {
         outputToClient.flush();
 
     }
-
-  /*  private static void input() throws IOException {
-        Socket socket = new Socket();
-        InetSocketAddress socketAddress = new InetSocketAddress(5050);
-        socket.connect(socketAddress);
-        BufferedReader inputFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-        while(true){
-            var line = inputFromServer.readLine();
-            if(line== null || line.isEmpty()) {
-                break;
-            }
-            System.out.println(line);
-        }
-
-        inputFromServer.close();
-        socket.close();
-
-    }*/
-
     private static String requestHandler(BufferedReader inputFromClient) throws IOException {
         String url = "";
 
