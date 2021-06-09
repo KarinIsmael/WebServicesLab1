@@ -19,7 +19,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Main {
+
     static ServiceLoader<Welcome> welcomes = ServiceLoader.load(Welcome.class);
+
     public static List<String> synchronised = new ArrayList<>();
 
     static EntityManagerFactory emf = Persistence.createEntityManagerFactory("user");
@@ -31,6 +33,7 @@ public class Main {
         try (ServerSocket serverSocket = new ServerSocket(5050)){
             while (true){
                 Socket client = serverSocket.accept();
+                System.out.println("=======================================");
                 executorService.submit(()->handleConnection(client));
             }
 
@@ -45,9 +48,8 @@ public class Main {
 
         try {
             BufferedReader inputFromClient = new BufferedReader(new InputStreamReader((client.getInputStream())));
-            String url = requestHandler(inputFromClient);
-//            var url2 = requestHandlerInputMessage(inputFromClient);
 
+            String url = requestHandler(inputFromClient);
             OutputStream outputToClient = client.getOutputStream();
 
         if(url.equals("/hej")) {
@@ -64,13 +66,13 @@ public class Main {
         }
         else if(url.contains("/sendmessage/"))
                 DatabaseManagement.saveMessage(url,outputToClient);
-              //saveMessage2(outputToClient, url);
+
         else{
             output(client);
         }
 
         DatabaseManagement.saveIpToDatabase(client,outputToClient);
-        //input();
+        //vi can lagra alla close method i en sparat method
         inputFromClient.close();
         outputToClient.close();
         client.close();
@@ -82,29 +84,6 @@ public class Main {
         System.out.println(client.getInetAddress());
         System.out.println(Thread.currentThread().getName());
     }
-//
-//    private static void saveMessage2(OutputStream outputToClient, String url) throws IOException {
-//
-//        EntityManager em = emf.createEntityManager();
-//
-//        Usermessage usermessage = new Usermessage(url);
-//        em.getTransaction().begin();
-//        em.persist(usermessage);
-//        em.getTransaction().commit();
-//
-//        Gson gson = new Gson();
-//
-//        String json = gson.toJson("Following message has been saved to the server: "+url);
-//        System.out.println(json);
-//
-//        byte[] data = json.getBytes(StandardCharsets.UTF_8);
-//        String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + data.length + "\r\n\r\n";
-//        outputToClient.write(header.getBytes());
-//        outputToClient.write(data);
-//        outputToClient.flush();
-//        em.close();
-//
-//    }
 
     private static void sendOrangutangResponse(OutputStream outputToClient) throws IOException {
 
@@ -143,10 +122,6 @@ public class Main {
 
         File find = Path.of("core", "target", "classes", "apa.png").toFile();
 
-        if (!(find.exists()&&!find.isDirectory())){
-            header = "HTTP/1.1 404 Not Found\r\nContent-length: 0\r\n\r\n";
-
-        } else {
         try (FileInputStream fileInput = new FileInputStream(find)) {
 
             data = new byte[(int) find.length()];
@@ -157,7 +132,6 @@ public class Main {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
     }
 
         outputToClient.write(header.getBytes());
