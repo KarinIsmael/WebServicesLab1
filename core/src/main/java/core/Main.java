@@ -1,14 +1,12 @@
 package core;
 
 import com.google.gson.Gson;
-import user.UserInfo;
+import interf.TypeOfUser;
+import interf.Welcome;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.TypedQuery;
 import java.io.*;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -16,11 +14,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Main {
-    public static List<String> billboard = new ArrayList<>();
+    static ServiceLoader<Welcome> welcomes = ServiceLoader.load(Welcome.class);
+    public static List<String> synchronised = new ArrayList<>();
 
     static EntityManagerFactory emf = Persistence.createEntityManagerFactory("user");
 
@@ -44,13 +44,13 @@ public class Main {
 
         try {
             BufferedReader inputFromClient = new BufferedReader(new InputStreamReader((client.getInputStream())));
-            var url = requestHandler(inputFromClient);
+            String url = requestHandler(inputFromClient);
 //            var url2 = requestHandlerInputMessage(inputFromClient);
 
-            var outputToClient = client.getOutputStream();
+            OutputStream outputToClient = client.getOutputStream();
 
 
-            saveIpToDatabase(client);
+            DatabaseManagement.saveIpToDatabase(client);
 
 
         if(url.equals("/hej")) {
@@ -63,7 +63,7 @@ public class Main {
             sendOrangutangResponse(outputToClient);
         }
         else if (url.equals("/user-ips")){
-            sendIpAdresses(outputToClient);
+            DatabaseManagement.sendIpAdresses(outputToClient);
         }
         else if(url.contains("/sendmessage/"))
                 DatabaseManagement.saveMessage(inputFromClient,outputToClient);
@@ -123,7 +123,7 @@ public class Main {
                 data = new byte[(int) find.length()];
                 fileInput.read(data);
 
-                var contentType = Files.probeContentType(find.toPath());
+                String contentType = Files.probeContentType(find.toPath());
                 header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
 
             } catch (FileNotFoundException e) {
@@ -153,7 +153,7 @@ public class Main {
             data = new byte[(int) find.length()];
             fileInput.read(data);
 
-            var contentType = Files.probeContentType(find.toPath());
+            String contentType = Files.probeContentType(find.toPath());
             header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
 
         } catch (FileNotFoundException e) {
@@ -167,60 +167,20 @@ public class Main {
 
     }
 
-    private static void sendIpAdresses(OutputStream outputToClient) throws IOException {
-
-        EntityManager em = emf.createEntityManager();
-
-        TypedQuery<String> query = em.createQuery("SELECT ip.ipAddress FROM UserInfo ip", String.class);
-
-        List<String> ipAdresses = query.getResultList();
-
-        Gson gson = new Gson();
-
-        String json = gson.toJson(ipAdresses);
-        System.out.println(json);
-
-        byte[] data = json.getBytes(StandardCharsets.UTF_8);
-        String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + data.length+"\r\n\r\n";
-        outputToClient.write(header.getBytes());
-        outputToClient.write(data);
-        outputToClient.flush();
-    }
-
-    private static void saveIpToDatabase(Socket client) throws IOException {
-
-        InetAddress ipAdress = client.getInetAddress();
-        String userIp = ipAdress.toString();
-
-        EntityManager em = emf.createEntityManager();
-
-        TypedQuery<String> query = em.createQuery("SELECT ip.ipAddress FROM UserInfo ip", String.class);
-
-        List<String> ipAdresses = query.getResultList();
-
-        if(!ipAdresses.contains(userIp))
-         {
-            UserInfo user = new UserInfo(userIp);
-
-            em.getTransaction().begin();
-            em.persist(user);
-            em.getTransaction().commit();
-
-        } else if(ipAdresses.contains(userIp))
-        {
-            System.out.println(userIp+" visited again!");
-
-            //PrintWriter outputToClient = new PrintWriter(client.getOutputStream());
-            //outputToClient.print("HTTP/1.1 200 OK \r\nThank you for visiting again!");
-        }
-        em.close();
-    }
-
     private static void sendJsonResponse(OutputStream outputToClient) throws IOException {
 
-        String response = "Thank you for visiting again";
+        String v = null;
+        Welcome welcome = null;
+        TypeOfUser annotation = welcome.getClass().getAnnotation(TypeOfUser.class);
+        boolean an = annotation.equals("/old");
+            while (an){
+                v = welcome.welcome();
+        }
+        //String response = "Thank you for visiting again";
+        //WelcomeMessages.welcomeOldUser();
         Gson gson = new Gson();
-        String json = gson.toJson(response);
+        //String json = gson.toJson(WelcomeMessages.welcomeOldUser());
+        String json = gson.toJson(v);
         System.out.println(json);
 
         byte[] data = json.getBytes(StandardCharsets.UTF_8);
@@ -273,7 +233,7 @@ public class Main {
 //    }
 
     private static String requestHandler(BufferedReader inputFromClient) throws IOException {
-        var url="";
+        String url = "";
 
         List<String> templist = new ArrayList<>();
 
@@ -291,8 +251,8 @@ public class Main {
             templist.add(line);
             System.out.println(line);
         }
-        synchronized (billboard){
-            billboard.addAll(templist);
+        synchronized (synchronised){
+            synchronised.addAll(templist);
         }
         return url;
     }
