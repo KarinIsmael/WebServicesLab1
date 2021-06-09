@@ -100,6 +100,7 @@ public class Main {
     }
 
     private static void fileImporter(OutputStream outputToClient, File find) throws IOException {
+
         FileInputStream fileInput = new FileInputStream(find);
 
         byte[] data = new byte[(int) find.length()];
@@ -144,7 +145,6 @@ public class Main {
         outputToClient.print("HTTP/1.1 404 Not Found\r\nContent-length: 0\r\n\r\n");
 
         outputToClient.flush();
-        //outputToClient.close();
 
     }
 
@@ -166,18 +166,6 @@ public class Main {
         socket.close();
 
     }*/
-
-//    private static void input(Socket client) throws IOException {
-//        BufferedReader inputFromClient = new BufferedReader(new InputStreamReader((client.getInputStream())));
-//
-//        requestHandler(inputFromClient);
-//        //String line = inputFromClient.readLine();
-//
-//        //System.out.println(line);
-//
-//        inputFromClient.close();
-//        client.close();
-//    }
 
     private static String requestHandler(BufferedReader inputFromClient) throws IOException {
         String url = "";
