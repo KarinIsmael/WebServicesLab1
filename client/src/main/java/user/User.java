@@ -1,65 +1,42 @@
 package user;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.InetAddress;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 public class User {
 
-    static EntityManagerFactory emf = Persistence.createEntityManagerFactory("user");
+    public static void main(String[] args) {
 
-    /*public static void saveIpAdress(){
         try {
-            Socket socket = new Socket("192.168.1.155", 5050);
+            Socket socket = new Socket("localhost",5050);
+            PrintWriter output = new PrintWriter(socket.getOutputStream());
 
-            InetAddress ipAdress = socket.getInetAddress();
-            EntityManager em = emf.createEntityManager();
+            output.print("GET / HTTP/1.1\r\n");
+            output.print("Host: localhost\r\n");
+            output.println("Hello From Client Arif\r\n\r\n");
+            output.print("\r\n");
+            output.flush();
 
-            UserInfo user = new UserInfo(ipAdress);
+            var inputFromServer = new BufferedReader(new InputStreamReader((socket.getInputStream())));
 
-            em.getTransaction().begin();
-            em.persist(user);
-            em.getTransaction().commit();
-            em.close();
+            while(true){
+                var line = inputFromServer.readLine();
+                if ( line == null || line.isEmpty()) {
+                    break;
+                }
+                System.out.println(line);
+            }
+            output.flush();
+            inputFromServer.close();
+            output.close();
+            socket.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }*/
     }
 
-    /*public static void main(String[] args) {
-
-        *//*Socket client = null;
-        InetAddress ipAdress = client.getInetAddress();
-        EntityManager em = emf.createEntityManager();
-
-        UserInfo user = new UserInfo(ipAdress);
-
-        em.getTransaction().begin();
-        em.persist(user);
-        em.getTransaction().commit();
-        em.close();*//*
-
-
-        try {
-            Socket socket = new Socket("192.168.1.155", 5050);
-
-            InetAddress ipAdress = socket.getInetAddress();
-            EntityManager em = emf.createEntityManager();
-
-            UserInfo user = new UserInfo(ipAdress);
-
-            em.getTransaction().begin();
-            em.persist(user);
-            em.getTransaction().commit();
-            em.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
-
+}

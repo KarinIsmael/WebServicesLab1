@@ -1,6 +1,8 @@
 package core;
 
 import com.google.gson.Gson;
+import welcomeMessage.Hello;
+
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.io.*;
@@ -58,14 +60,14 @@ public class Main {
             } else if (url.equals("/user-ips")) {
                 DatabaseManagement.sendIpAdresses(outputToClient);
 
-            } else if (url.contains("/sendmessage/"))
+            } else if (url.contains("/sendmessage/")) {
                 DatabaseManagement.saveMessage(url, outputToClient);
-
-            else {
-                output(client);
+            } else {
+                sendTextResponse(outputToClient);
+//                output(client);
             }
 
-           DatabaseManagement.saveIpToDatabase(client, outputToClient);
+            DatabaseManagement.saveIpToDatabase(client, outputToClient);
 
             outputToClient.flush();
             inputFromClient.close();
@@ -78,6 +80,16 @@ public class Main {
 
         System.out.println(client.getInetAddress());
         System.out.println(Thread.currentThread().getName());
+    }
+
+    private static void sendTextResponse(OutputStream outputToClient) throws IOException {
+        String header = "";
+        byte[] data = new Hello().sayHelloToServer().getBytes();
+        header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-length: " + data.length + "\r\n\r\n";
+
+        outputToClient.write(header.getBytes());
+        outputToClient.write(data);
+
     }
 
     private static void sendOrangutangResponse(OutputStream outputToClient) throws IOException {
@@ -131,7 +143,7 @@ public class Main {
         outputToClient.flush();
     }
 
-    private static void output(Socket client) throws IOException {
+    private static void output(Socket client) throws IOException {// Not in use
 
         PrintWriter outputToClient = new PrintWriter(client.getOutputStream());
         outputToClient.print("HTTP/1.1 404 Not Found\r\nContent-length: 0\r\n\r\n");

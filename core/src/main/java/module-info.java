@@ -9,4 +9,5 @@ module core {
     requires java.xml.bind;
     requires org.hibernate.orm.core;
     requires message;
+    requires Welcome;
 }

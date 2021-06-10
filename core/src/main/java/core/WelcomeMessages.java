@@ -12,7 +12,6 @@ public class WelcomeMessages {
     static String welcomeOldUser() {
         ServiceLoader<Welcome> welcomes = ServiceLoader.load(Welcome.class);
 
-        System.out.println("Hello From Welcome");
         for (Welcome welcome : welcomes) {
 
             TypeOfUser annotation = welcome.getClass().getAnnotation(TypeOfUser.class);
