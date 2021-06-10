@@ -125,7 +125,7 @@ public class Main {
     }
 
     private static void sendTxtResponse(OutputStream outputToClient) throws IOException {
-        File find = Path.of("core", "target", "classes", "Hej.txt").toFile();
+        File find = Path.of("core","target","web", "Hej.txt").toFile();
 
         fileImporter(outputToClient, find);
     }
