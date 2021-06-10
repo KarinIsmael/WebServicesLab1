@@ -1,7 +1,5 @@
 package core;
 
-import com.google.gson.Gson;
-import interf.Welcome;
 import user.UserInfo;
 import user.Usermessage;
 
@@ -11,12 +9,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.ServiceLoader;
 
 import static core.Main.getGson;
-//import static core.Main.welcomes;
 
 public class DatabaseManagement {
     static String message;
@@ -49,7 +44,7 @@ public class DatabaseManagement {
 
         List<String> ipAdresses = query.getResultList();
 
-        getGson(outputToClient, message);
+        getGson(outputToClient, ipAdresses);
 
     }
 
@@ -77,6 +72,7 @@ public class DatabaseManagement {
             getGson(outputToClient, message);
 
         } else if (ipAdresses.contains(userIp)) {
+            System.out.println("Hello world");
 
             message = WelcomeMessages.welcomeOldUser();
             getGson(outputToClient, message);

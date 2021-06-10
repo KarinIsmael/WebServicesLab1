@@ -11,7 +11,7 @@
         <module>client</module>
         <module>core</module>
         <module>Welcome</module>
-        <module>interface</module>
+        <module>message</module>
     </modules>
     <packaging>pom</packaging>
     <name>parent-project</name>

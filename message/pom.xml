@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>interface</artifactId>
+    <artifactId>message</artifactId>
     <build>
         <plugins>
             <plugin>

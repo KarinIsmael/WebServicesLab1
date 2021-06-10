@@ -1,3 +1,3 @@
 module Welcome {
-    requires interfacex;
+    requires message;
 }

@@ -1,9 +1,6 @@
 package core;
 
 import com.google.gson.Gson;
-import interf.TypeOfUser;
-import interf.Welcome;
-
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.io.*;
@@ -14,14 +11,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Main {
-
-    //static ServiceLoader<Welcome> welcomes = ServiceLoader.load(Welcome.class);
-    static String message;
 
     public static List<String> synchronised = new ArrayList<>();
 
@@ -53,16 +46,16 @@ public class Main {
             String url = requestHandler(inputFromClient);
             OutputStream outputToClient = client.getOutputStream();
 
-            if (url.equalsIgnoreCase("/hej")) {
+            if (url.equals("/hej")) {
                 sendTxtResponse(outputToClient);
 
-            } else if (url.equalsIgnoreCase("/apa")) {
+            } else if (url.equals("/apa")) {
                 sendImageResponse(outputToClient);
 
-            } else if (url.equalsIgnoreCase("/morningface")) {
+            } else if (url.equals("/morningface")) {
                 sendOrangutangResponse(outputToClient);
 
-            } else if (url.equalsIgnoreCase("/user-ips")) {
+            } else if (url.equals("/user-ips")) {
                 DatabaseManagement.sendIpAdresses(outputToClient);
 
             } else if (url.contains("/sendmessage/"))
@@ -72,8 +65,9 @@ public class Main {
                 output(client);
             }
 
-            DatabaseManagement.saveIpToDatabase(client, outputToClient);
+           DatabaseManagement.saveIpToDatabase(client, outputToClient);
 
+            outputToClient.flush();
             inputFromClient.close();
             outputToClient.close();
             client.close();
@@ -115,6 +109,7 @@ public class Main {
         outputToClient.write(header.getBytes());
         outputToClient.write(data);
         outputToClient.flush();
+
     }
 
     private static void sendTxtResponse(OutputStream outputToClient) throws IOException {
@@ -123,7 +118,8 @@ public class Main {
         fileImporter(outputToClient, find);
     }
 
-    public static void getGson(OutputStream outputToClient, String message) throws IOException {
+    public static void getGson(OutputStream outputToClient, Object message) throws IOException {
+
         Gson gson = new Gson();
         String json = gson.toJson(message);
         System.out.println(json);
@@ -168,29 +164,6 @@ public class Main {
         }
         return url;
     }
-
-//    private static String requestHandlerInputMessage(BufferedReader inputFromClient) throws IOException {
-//        String url2="";
-//
-//        List<String> templist = new ArrayList<>();
-//
-//        while (true) {
-//            var line = inputFromClient.readLine();
-//           url2 = line.split("/sendmessage/")[12];
-//            /*if (line.startsWith("GET")) {
-//                url2 = line.split("/sendmessage/")[15];
-//            }else if (line == null || line.isEmpty()) {
-//                break;
-//            } else System.out.println("Wrong");*/
-//
-//            templist.add(url2);
-//            System.out.println(url2);
-//        }
-//        synchronized (billboard){
-//            billboard.addAll(templist);
-//        }
-//        return url2;
-//    }
 
 }
 

@@ -25,7 +25,7 @@
     <dependencies>
         <dependency>
             <groupId>org.example</groupId>
-            <artifactId>interface</artifactId>
+            <artifactId>message</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

@@ -9,7 +9,7 @@
         <module name="core" />
         <module name="client" />
         <module name="Welcome" />
-        <module name="interface" />
+        <module name="message" />
         <module name="welcome" />
       </profile>
     </annotationProcessing>

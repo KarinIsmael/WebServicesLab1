@@ -1,7 +1,7 @@
 package welcomeMessage;
 
-import interf.TypeOfUser;
-import interf.Welcome;
+import message.TypeOfUser;
+import message.Welcome;
 
 public class WelcomeMessageNewUser {
 

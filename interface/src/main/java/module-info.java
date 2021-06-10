@@ -1,3 +1,0 @@
-module interfacex {
-    exports interf;
-}
