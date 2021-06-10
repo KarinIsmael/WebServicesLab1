@@ -53,16 +53,16 @@ public class Main {
             String url = requestHandler(inputFromClient);
             OutputStream outputToClient = client.getOutputStream();
 
-            if (url.equals("/hej")) {
+            if (url.equalsIgnoreCase("/hej")) {
                 sendTxtResponse(outputToClient);
 
-            } else if (url.equals("/apa")) {
+            } else if (url.equalsIgnoreCase("/apa")) {
                 sendImageResponse(outputToClient);
 
-            } else if (url.equals("/morningface")) {
+            } else if (url.equalsIgnoreCase("/morningface")) {
                 sendOrangutangResponse(outputToClient);
 
-            } else if (url.equals("/user-ips")) {
+            } else if (url.equalsIgnoreCase("/user-ips")) {
                 DatabaseManagement.sendIpAdresses(outputToClient);
 
             } else if (url.contains("/sendmessage/"))
