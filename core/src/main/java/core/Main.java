@@ -20,7 +20,8 @@ import java.util.concurrent.Executors;
 
 public class Main {
 
-    static ServiceLoader<Welcome> welcomes = ServiceLoader.load(Welcome.class);
+    //static ServiceLoader<Welcome> welcomes = ServiceLoader.load(Welcome.class);
+    static String message;
 
     public static List<String> synchronised = new ArrayList<>();
 
@@ -53,15 +54,17 @@ public class Main {
             OutputStream outputToClient = client.getOutputStream();
 
             if (url.equals("/hej")) {
-                sendJsonResponse(outputToClient, inputFromClient);
+                sendTxtResponse(outputToClient);
 
             } else if (url.equals("/apa")) {
                 sendImageResponse(outputToClient);
 
             } else if (url.equals("/morningface")) {
                 sendOrangutangResponse(outputToClient);
+
             } else if (url.equals("/user-ips")) {
                 DatabaseManagement.sendIpAdresses(outputToClient);
+
             } else if (url.contains("/sendmessage/"))
                 DatabaseManagement.saveMessage(url, outputToClient);
 
@@ -70,7 +73,7 @@ public class Main {
             }
 
             DatabaseManagement.saveIpToDatabase(client, outputToClient);
-            //vi can lagra alla close method i en sparat method
+
             inputFromClient.close();
             outputToClient.close();
             client.close();
@@ -114,20 +117,13 @@ public class Main {
         outputToClient.flush();
     }
 
-    private static void sendJsonResponse(OutputStream outputToClient, BufferedReader inputFromClient) throws IOException {
+    private static void sendTxtResponse(OutputStream outputToClient) throws IOException {
+        File find = Path.of("core", "target", "classes", "Hej.txt").toFile();
 
-        String url = inputFromClient.readLine();
-        String message = null;
-        Welcome welcome = null;
-        TypeOfUser annotation = welcome.getClass().getAnnotation(TypeOfUser.class);
-        boolean an = annotation.equals("/old");
-        while (an) {
-            message = welcome.welcome();
-        }
-        getGson(outputToClient, message);
+        fileImporter(outputToClient, find);
     }
 
-   public static void getGson(OutputStream outputToClient, String message) throws IOException {
+    public static void getGson(OutputStream outputToClient, String message) throws IOException {
         Gson gson = new Gson();
         String json = gson.toJson(message);
         System.out.println(json);
@@ -147,6 +143,7 @@ public class Main {
         outputToClient.flush();
 
     }
+
     private static String requestHandler(BufferedReader inputFromClient) throws IOException {
         String url = "";
 
@@ -194,7 +191,6 @@ public class Main {
 //        }
 //        return url2;
 //    }
-
 
 }
 

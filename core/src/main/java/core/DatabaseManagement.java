@@ -1,5 +1,7 @@
 package core;
 
+import com.google.gson.Gson;
+import interf.Welcome;
 import user.UserInfo;
 import user.Usermessage;
 
@@ -11,44 +13,47 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.ServiceLoader;
 
 import static core.Main.getGson;
+//import static core.Main.welcomes;
 
 public class DatabaseManagement {
-static String message;
+    static String message;
+
     public static void saveMessage(String url, OutputStream outputToClient) throws IOException {
 
-            EntityManager em = Main.emf.createEntityManager();
-            String line = url;
+        EntityManager em = Main.emf.createEntityManager();
+        String line = url;
 
-                if (line.contains("/sendmessage/")) {
+        if (line.contains("/sendmessage/")) {
 
-                    String msg = line.substring(13);
+            String message = line.substring(13);
 
-                    Usermessage usermessage = new Usermessage(msg);
+            Usermessage usermessage = new Usermessage(message);
 
-                    em.getTransaction().begin();
-                    em.persist(usermessage);
-                    em.getTransaction().commit();
+            em.getTransaction().begin();
+            em.persist(usermessage);
+            em.getTransaction().commit();
 
-                    getGson(outputToClient, message);
-                    em.close();
-                }
+            getGson(outputToClient, message);
+            em.close();
+        }
 
-            }
+    }
 
-    static void sendIpAdresses(OutputStream outputToClient) throws IOException {
+    public static void sendIpAdresses(OutputStream outputToClient) throws IOException {
 
         EntityManager em = Main.emf.createEntityManager();
         TypedQuery<String> query = em.createQuery("SELECT ip.ipAddress FROM UserInfo ip", String.class);
 
         List<String> ipAdresses = query.getResultList();
 
-        getGson(outputToClient,message);
+        getGson(outputToClient, message);
 
     }
 
-    static void saveIpToDatabase(Socket client, OutputStream outputToClient) throws IOException {
+    public static void saveIpToDatabase(Socket client, OutputStream outputToClient) throws IOException {
 
         //ServiceLoader<Welcome> welcomes = ServiceLoader.load(Welcome.class);
 
@@ -61,21 +66,21 @@ static String message;
 
         List<String> ipAdresses = query.getResultList();
 
-        if(!ipAdresses.contains(userIp))
-         {
+        if (!ipAdresses.contains(userIp)) {
             UserInfo user = new UserInfo(userIp);
 
             em.getTransaction().begin();
             em.persist(user);
             em.getTransaction().commit();
 
-             WelcomeMessages.welcomeNewUser();
-
-         } else if(ipAdresses.contains(userIp))
-        {
-
+            message = WelcomeMessages.welcomeNewUser();
             getGson(outputToClient, message);
-            System.out.println(userIp+" visited again!");
+
+        } else if (ipAdresses.contains(userIp)) {
+
+            message = WelcomeMessages.welcomeOldUser();
+            getGson(outputToClient, message);
+            System.out.println(userIp + " visited again!");
         }
         em.close();
     }

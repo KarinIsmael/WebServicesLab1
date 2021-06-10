@@ -3,35 +3,39 @@ package core;
 import interf.TypeOfUser;
 import interf.Welcome;
 import welcomeMessage.WelcomeMessage;
+import welcomeMessage.WelcomeMessageNewUser;
 
 import java.util.ServiceLoader;
 
 public class WelcomeMessages {
     static String mes;
 
-    static ServiceLoader<WelcomeMessage> welcomes = ServiceLoader.load(WelcomeMessage.class);
+    static ServiceLoader<Welcome> welcomes = ServiceLoader.load(Welcome.class);
 
     static String welcomeOldUser() {
 
-        for (WelcomeMessage welcome : welcomes) {
+        for (Welcome welcome : welcomes) {
 
             TypeOfUser annotation = welcome.getClass().getAnnotation(TypeOfUser.class);
             if(annotation!= null && annotation.value().equals( "/old")) {
 
                 mes = welcome.welcome();
-                System.out.println(welcome.welcome());
+                //System.out.println(welcome.welcome());
             }
         }
         return mes;
     }
 
-    static void welcomeNewUser() {
-        for (WelcomeMessage welcome : welcomes) {
+    static String welcomeNewUser() {
+        for (Welcome welcome : welcomes) {
 
             TypeOfUser annotation = welcome.getClass().getAnnotation(TypeOfUser.class);
             if (annotation != null && annotation.value().equals("/new")) {
-                System.out.println(welcome.welcome());
+
+                mes = welcome.welcome();
+                //System.out.println((mes));
             }
         }
+        return mes;
     }
 }
