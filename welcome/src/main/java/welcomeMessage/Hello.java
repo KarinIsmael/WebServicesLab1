@@ -2,7 +2,7 @@ package welcomeMessage;
 
 public class Hello {
 
-    public String sayHelloToServer(){
-        return "Hello from our server";
+    public String sayHelloFromServer(){
+        return "Hello from our server! Welcome!";
     }
 }

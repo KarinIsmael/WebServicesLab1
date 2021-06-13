@@ -62,9 +62,18 @@ public class Main {
 
             } else if (url.contains("/sendmessage/")) {
                 DatabaseManagement.saveMessage(url, outputToClient);
-            } else {
+
+            }else if(url.contains("/showmessages")){
+                DatabaseManagement.showMessages(outputToClient);
+
+            } else if(url.contains("/whoami")){
+                DatabaseManagement.serviceloaderMessage(outputToClient, client);
+
+            }else if(url.contains("/hello")) {
                 sendTextResponse(outputToClient);
-//                output(client);
+
+            } else {
+                output(client);
             }
 
             DatabaseManagement.saveIpToDatabase(client, outputToClient);
@@ -82,10 +91,9 @@ public class Main {
         System.out.println(Thread.currentThread().getName());
     }
 
-    private static void sendTextResponse(OutputStream outputToClient) throws IOException {
-        String header = "";
-        byte[] data = new Hello().sayHelloToServer().getBytes();
-        header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-length: " + data.length + "\r\n\r\n";
+    public static void sendTextResponse(OutputStream outputToClient) throws IOException {
+        byte[] data = new Hello().sayHelloFromServer().getBytes();
+        String header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-length: " + data.length + "\r\n\r\n";
 
         outputToClient.write(header.getBytes());
         outputToClient.write(data);
@@ -94,7 +102,7 @@ public class Main {
 
     private static void sendOrangutangResponse(OutputStream outputToClient) throws IOException {
 
-        File find = Path.of("core", "target", "classes", "Orangutang.jpg").toFile();
+        File find = Path.of("core", "target", "web", "Orangutang.jpg").toFile();
 
         fileImporter(outputToClient, find);
 
@@ -102,7 +110,7 @@ public class Main {
 
     private static void sendImageResponse(OutputStream outputToClient) throws IOException {
 
-        File find = Path.of("core", "target", "classes", "apa.png").toFile();
+        File find = Path.of("core", "target", "web", "apa.png").toFile();
 
         fileImporter(outputToClient, find);
 
@@ -111,13 +119,12 @@ public class Main {
     private static void fileImporter(OutputStream outputToClient, File find) throws IOException {
 
         FileInputStream fileInput = new FileInputStream(find);
-
         byte[] data = new byte[(int) find.length()];
         fileInput.read(data);
 
         String contentType = Files.probeContentType(find.toPath());
-        String header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
 
+        String header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
         outputToClient.write(header.getBytes());
         outputToClient.write(data);
         outputToClient.flush();
@@ -125,7 +132,7 @@ public class Main {
     }
 
     private static void sendTxtResponse(OutputStream outputToClient) throws IOException {
-        File find = Path.of("core","target","web", "Hej.txt").toFile();
+        File find = Path.of("core", "target", "web", "Hej.txt").toFile();
 
         fileImporter(outputToClient, find);
     }
